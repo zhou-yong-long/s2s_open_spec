@@ -4,6 +4,7 @@ import { hideBin } from "yargs/helpers";
 import { initCommand } from "./commands/init.js";
 import { newCommand } from "./commands/new.js";
 import { statusCommand } from "./commands/status.js";
+import { amendCommand } from "./commands/amend.js";
 
 function main() {
   yargs(hideBin(process.argv))
@@ -12,6 +13,7 @@ function main() {
     .command(initCommand)
     .command(newCommand)
     .command(statusCommand)
+    .command(amendCommand)
     .demandCommand(1, "Use one of the commands above")
     .help()
     .version("0.1.0")
