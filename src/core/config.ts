@@ -48,16 +48,13 @@ export function writeConfig(projectRoot: string, config: Config): void {
   writeFileSync(join(projectRoot, ".sdd", "config.yaml"), yaml.dump(config, { indent: 2, lineWidth: 120 }));
 }
 
-function deepMerge<T extends Record<string, unknown>>(defaults: T, overrides: Partial<T>): T {
-  const result = { ...defaults } as Record<string, unknown>;
-  for (const key of Object.keys(overrides)) {
-    const ov = overrides[key];
-    const dv = defaults[key as keyof T];
-    if (ov !== null && typeof ov === "object" && !Array.isArray(ov) && typeof dv === "object" && !Array.isArray(dv)) {
-      result[key] = deepMerge(dv as Record<string, unknown>, ov as Record<string, unknown>);
-    } else if (ov !== undefined) {
-      result[key] = ov;
-    }
-  }
-  return result as T;
+function deepMerge(defaults: Config, overrides: Partial<Config>): Config {
+  return {
+    ...defaults,
+    ...overrides,
+    doctor: overrides.doctor ? { ...defaults.doctor, ...overrides.doctor } : defaults.doctor,
+    paths: overrides.paths ? { ...defaults.paths, ...overrides.paths } : defaults.paths,
+    plugins: overrides.plugins ? { ...defaults.plugins, ...overrides.plugins } : defaults.plugins,
+    extractors: overrides.extractors ? { ...defaults.extractors, ...overrides.extractors } : defaults.extractors,
+  };
 }
