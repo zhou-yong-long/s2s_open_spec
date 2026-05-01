@@ -9,6 +9,18 @@ export interface Plugin {
 
 export async function loadPlugins(config: Config, cwd: string): Promise<CommandModule[]> {
   const commands: CommandModule[] = [];
-  // Plugins are loaded later — this just keeps the interface ready.
+  const plugins = config.plugins;
+
+  if (plugins.workflow) {
+    const p = await import("./workflow.js");
+    commands.push(...Object.values(p.default.commands));
+  }
+  if (plugins.doctor) {
+    // Will be added in Task 13
+  }
+  if (plugins.diff) {
+    // Will be added in Task 16
+  }
+
   return commands;
 }
