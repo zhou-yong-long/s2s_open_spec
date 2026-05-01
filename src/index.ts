@@ -5,9 +5,15 @@ import { initCommand } from "./commands/init.js";
 import { newCommand } from "./commands/new.js";
 import { statusCommand } from "./commands/status.js";
 import { amendCommand } from "./commands/amend.js";
+import { loadPlugins } from "./plugins/loader.js";
+import { readConfig } from "./core/config.js";
 
-function main() {
-  yargs(hideBin(process.argv))
+async function main() {
+  const cwd = process.cwd();
+  let config;
+  try { config = readConfig(cwd); } catch { config = undefined; }
+
+  const y = yargs(hideBin(process.argv))
     .scriptName("sdd")
     .usage("$0 <command> [options]")
     .command(initCommand)
@@ -16,8 +22,17 @@ function main() {
     .command(amendCommand)
     .demandCommand(1, "Use one of the commands above")
     .help()
-    .version("0.1.0")
-    .parse();
+    .version("0.1.0");
+
+  if (config) {
+    const pluginCommands = await loadPlugins(config, cwd);
+    for (const cmd of pluginCommands) y.command(cmd);
+  }
+
+  y.parse();
 }
 
-main();
+main().catch((err) => {
+  console.error(err.message);
+  process.exit(1);
+});
