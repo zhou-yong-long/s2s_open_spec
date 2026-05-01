@@ -16,7 +16,8 @@ export async function loadPlugins(config: Config, cwd: string): Promise<CommandM
     commands.push(...Object.values(p.default.commands));
   }
   if (plugins.doctor) {
-    // Will be added in Task 13
+    const p = await import("./doctor.js");
+    commands.push(...Object.values(p.default.commands));
   }
   if (plugins.diff) {
     // Will be added in Task 16
