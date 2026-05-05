@@ -37,6 +37,8 @@ linked_files: []
 | Date | Reviewer | Decision | Notes |
 |------|----------|----------|-------|
 
+## Review Threads
+
 ## Changelog
 | Date | Change | Author |
 |------|--------|--------|
