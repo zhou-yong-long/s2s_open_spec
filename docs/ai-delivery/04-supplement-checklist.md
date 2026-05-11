@@ -1,5 +1,14 @@
 # 补充：交付检查清单与常见问题
 
+## 0. 离线安装包（不依赖 GitHub push）
+
+在仓库根执行 **`npm run bundle`**（需已 `npm install`），生成目录 **`release/`**：
+
+- **`sdd-cli-offline-*.zip`**：内含 `sdd-cli-0.1.0.tgz`（已含 `dist/`，全局安装无需 `tsx`）、`INSTALL.md`、以及带测试的完整源码 zip（`git archive`）。
+- 将 zip 用飞书/网盘/U 盘发给对方即可；对方不必能访问你的 Git 远端。
+
+详见仓库根 [README.md](../../README.md) 的 *Offline install bundle* 小节。
+
 ## 1. 交付物清单（给集成方 / AI）
 
 | 文件 | 用途 |

@@ -164,6 +164,16 @@ npm run dev -- new my-feature
 npm test
 ```
 
+### Offline install bundle (no `git push` needed)
+
+From a clean checkout of branch `feature/sdd-karmastudio-pack`:
+
+```bash
+npm run bundle
+```
+
+This runs `build`, `test`, `npm pack`, `git archive` (full source with tests), and writes **`release/sdd-cli-offline-<timestamp>.zip`** (contains `sdd-cli-0.1.0.tgz`, `INSTALL.md`, and the full-source zip). Share that zip over Lark / USB / internal drive. Recipients follow `INSTALL.md` inside the zip (global install via `npm install -g ./sdd-cli-0.1.0.tgz`).
+
 ## License
 
 MIT
