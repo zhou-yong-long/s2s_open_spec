@@ -27,6 +27,17 @@ sdd init
 
 会得到 `specs/`、`templates/`、`.sdd/config.yaml`、`CLAUDE.md` 等（见仓库根 [README.md](../README.md)）。
 
+**新建规格类型**（`sdd new <name> [--type …]`）：
+
+| `--type` | 说明 | 默认文件名 |
+|----------|------|------------|
+| `feature-spec`（默认） | 工程向功能规格 | `YYYY-MM-DD-<slug>.md` |
+| `feature-spec-pm` | PM 向（范围、AC、发布等） | `YYYY-MM-DD-pm-<slug>.md` |
+| `qa-from-spec` | QA 检查表 / 追溯 | `YYYY-MM-DD-qa-<slug>.md` |
+| `design-doc` / `adr` | 设计文档 / ADR | `YYYY-MM-DD-<slug>.md` |
+
+`<name>` 含空格时在 shell 中加引号。仅字母数字与连字符会进入 slug；若规范化后为空，命令会失败。
+
 **团队评审与线程**：在 `.sdd/config.yaml` 中设置 `plugins.workflow: true`，以便使用 `sdd review`、`sdd threads`、`sdd resolve`、`sdd complete`、`sdd archive`。
 
 **漂移检测**：按需 `plugins.diff: true`、`plugins.doctor: true`。

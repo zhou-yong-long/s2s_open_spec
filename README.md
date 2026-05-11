@@ -19,8 +19,14 @@ npm install -g sdd-cli
 # Initialize SDD in your project
 sdd init
 
-# Create your first spec
+# Create your first spec (engineering template)
 sdd new my-feature
+
+# PM-heavy spec (file: specs/active/YYYY-MM-DD-pm-<slug>.md)
+sdd new "Billing rollout" --type feature-spec-pm
+
+# QA checklist from spec (file: ...-qa-<slug>.md)
+sdd new login-flow --type qa-from-spec
 
 # Write the spec (opens $EDITOR), then review it
 sdd review specs/active/2026-01-01-my-feature.md --self
@@ -42,7 +48,7 @@ sdd complete specs/active/2026-01-01-my-feature.md
 | Command | Description |
 |---------|-------------|
 | `sdd init` | Scaffold SDD directory structure in current project |
-| `sdd new <name>` | Create a new spec from template |
+| `sdd new <name>` | Create from template (`--type`: `feature-spec` (default), `feature-spec-pm`, `qa-from-spec`, `design-doc`, `adr`) |
 | `sdd status` | List all specs with status and staleness indicators |
 | `sdd amend <spec>` | Record a minor change to an existing spec |
 
@@ -119,12 +125,14 @@ Three templates included:
 
 Also includes templates for **Design Docs** and **ADR** (Architecture Decision Records).
 
-Additional templates in `scaffold/templates/` (copy or adapt; not all are wired to `sdd new --type`):
+Additional templates in `scaffold/templates/` (also selectable via `sdd new --type`):
 
-| File | Use |
-|------|-----|
-| `feature-spec-pm.md` | PM-heavy spec: scope, AC, rollout |
-| `qa-from-spec.md` | QA checklist and traceability to the spec |
+| File | `sdd new --type` | Output filename pattern |
+|------|------------------|-------------------------|
+| `feature-spec-pm.md` | `feature-spec-pm` | `YYYY-MM-DD-pm-<slug>.md` |
+| `qa-from-spec.md` | `qa-from-spec` | `YYYY-MM-DD-qa-<slug>.md` |
+
+Use quotes around `<name>` when the title contains spaces (shell passes a single argument). Slug always lowercases alphanumeric segments separated by `-`.
 
 ## AI Integration
 

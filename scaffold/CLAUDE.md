@@ -58,7 +58,7 @@ draft -> ready -> approved -> in-progress -> complete (or archived)
 ## Commands
 
 - `sdd status` -- See all active specs and their status
-- `sdd new "<name>"` -- Create a new spec
+- `sdd new "<name>"` -- Create a new spec (optional `--type`: `feature-spec` (default), `feature-spec-pm`, `qa-from-spec`, `design-doc`, `adr`)
 - `sdd amend <spec-file>` -- Update a spec with a minor change
 - `sdd review <spec>` -- Review a spec (self, approve, changes-requested, or comment)
 - `sdd threads <spec>` -- View review threads

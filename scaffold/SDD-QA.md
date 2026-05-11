@@ -13,7 +13,7 @@
 2. **Edge Cases**：表格中每一行应对应或可映射到至少一条用例或探索式测试说明。
 3. **Acceptance criteria**：逐条 AC 必须有可执行的验证步骤（手工或自动化引用）。
 
-可使用 `templates/qa-from-spec.md` 作为检查表骨架，按需求编号保存到 `specs/` 或团队测试库。
+可在仓库根执行 `sdd new <用例集名称> --type qa-from-spec`，生成 `specs/active/日期-qa-<slug>.md`（模板同 `templates/qa-from-spec.md`）。也可复制模板到团队测试库，与功能 spec 的 `links.parent` 对齐。
 
 ## `sdd diff`（可选）
 

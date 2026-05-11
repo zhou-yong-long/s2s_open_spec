@@ -11,8 +11,8 @@
 
 ## 模板选择
 
-- 偏交互与业务规则：优先使用 `templates/feature-spec-pm.md`（可复制为 `sdd new` 生成的文件基础，或手工复制改名）。
-- 与后端接口强绑定：在 `feature-spec.md` 上补充 AC 与范围章节即可。
+- 偏交互与业务规则：在仓库根执行 `sdd new "功能标题" --type feature-spec-pm`（生成 `specs/active/日期-pm-标题slug.md`，内容与 `templates/feature-spec-pm.md` 一致）。标题含空格时请 **加引号**。
+- 与后端接口强绑定：使用默认 `sdd new <name>`（`--type feature-spec`）并在规格中补充 AC 与范围章节即可。
 
 ## 状态协作
 

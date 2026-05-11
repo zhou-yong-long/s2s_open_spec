@@ -4,6 +4,7 @@ Short-lived pointers for automation. Prefer updating when behavior or integratio
 
 ## SDD + KarmaStudio / Feishu
 
+- `sdd new` supports `--type feature-spec-pm` and `qa-from-spec` (plus `design-doc`, `adr`); PM/QA files use `pm-` / `qa-` filename prefixes under `specs/active/`.
 - Delivery checklist for integrators: [docs/karmastudio-sdd-delivery.md](../docs/karmastudio-sdd-delivery.md).
 - PM/QA agent rules live under `scaffold/SDD-PM.md` and `scaffold/SDD-QA.md`; `sdd init` copies the whole `scaffold/` tree into the target repo.
 - Optional Open Spec YAML hints are commented in `scaffold/templates/feature-spec.md`. Custom frontmatter keys from Feishu sync are preserved: `src/core/spec.ts` merges non-core keys into `frontmatterExtra` and writes them back on `updateFrontmatter`.
