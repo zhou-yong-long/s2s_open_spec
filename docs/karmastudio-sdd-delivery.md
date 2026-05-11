@@ -2,6 +2,8 @@
 
 面向 **在无仓库写权限下**，把本仓库的 **SDD CLI + 规格约定** 交给 IDE 集成方（例如 KarmaStudio 维护者）内置测试。你已选择：**交付提示词与模板 + CLI 使用说明**，由对方粘贴进系统提示词或 RAG 索引。
 
+**给 AI 的一键交付包（安装 Prompt + IDE Prompt + PM/Dev/QA 全链路用例 + 补充清单）**：见 **[docs/ai-delivery/README.md](./ai-delivery/README.md)**。其中安装 Prompt **要求使用分支 `feature/sdd-karmastudio-pack`**，勿默认使用 `main`。
+
 ## 1. 版本与分支
 
 - 以固定 **git tag 或 commit** 交付（避免「最新 main」漂移）。

@@ -142,6 +142,8 @@ Compatible with Claude Code, Codex, and other AI coding assistants.
 
 See **[docs/karmastudio-sdd-delivery.md](docs/karmastudio-sdd-delivery.md)** for packaging SDD into an internal IDE (for example KarmaStudio), Feishu → Open Spec alignment, and the suggested file bundle for integration partners.
 
+**AI copy-paste prompts + PM/Dev/QA full-chain examples** (install from branch `feature/sdd-karmastudio-pack`, not `main`): **[docs/ai-delivery/README.md](docs/ai-delivery/README.md)**.
+
 ### CLI vs design docs
 
 - The long-form design under `docs/superpowers/` may mention **`sdd plan`**; that command is **not implemented** in this repo yet. Use `status: in-progress` in frontmatter manually when implementation starts.
