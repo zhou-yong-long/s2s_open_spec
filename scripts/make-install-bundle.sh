@@ -15,6 +15,9 @@ npm install
 npm run build
 npm test
 
+echo "==> delivery:sync (copy docs into delivery/)"
+npm run delivery:sync
+
 RELEASE="$ROOT/release"
 rm -rf "$RELEASE"
 mkdir -p "$RELEASE"
@@ -37,15 +40,16 @@ else
 fi
 
 cp "$ROOT/scripts/bundle-INSTALL.md" "$RELEASE/INSTALL.md"
+cp -R "$ROOT/delivery" "$RELEASE/delivery"
 
 OUT_ZIP="sdd-cli-offline-${STAMP}.zip"
 echo "==> zip -> release/$OUT_ZIP"
 (
   cd "$RELEASE"
   if [[ -n "$SRC_ZIP" && -f "$SRC_ZIP" ]]; then
-    zip -r "$OUT_ZIP" "$TGZ" INSTALL.md "$SRC_ZIP"
+    zip -r "$OUT_ZIP" "$TGZ" INSTALL.md "$SRC_ZIP" delivery
   else
-    zip -r "$OUT_ZIP" "$TGZ" INSTALL.md
+    zip -r "$OUT_ZIP" "$TGZ" INSTALL.md delivery
   fi
 )
 

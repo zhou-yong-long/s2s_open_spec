@@ -142,7 +142,7 @@ Compatible with Claude Code, Codex, and other AI coding assistants.
 
 See **[docs/karmastudio-sdd-delivery.md](docs/karmastudio-sdd-delivery.md)** for packaging SDD into an internal IDE (for example KarmaStudio), Feishu → Open Spec alignment, and the suggested file bundle for integration partners.
 
-**AI copy-paste prompts + PM/Dev/QA full-chain examples** (install from branch `feature/sdd-karmastudio-pack`, not `main`): **[docs/ai-delivery/README.md](docs/ai-delivery/README.md)**.
+**One-folder handoff (install + usage + AI prompts + examples):** **[`delivery/`](delivery/README.md)** — synced from `docs/` via `npm run delivery:sync`. Same prompts also live under [docs/ai-delivery](docs/ai-delivery/README.md). Install from branch **`feature/sdd-karmastudio-pack`**, not **`main`**.
 
 ### CLI vs design docs
 
@@ -172,7 +172,14 @@ From a clean checkout of branch `feature/sdd-karmastudio-pack`:
 npm run bundle
 ```
 
-This runs `build`, `test`, `npm pack`, `git archive` (full source with tests), and writes **`release/sdd-cli-offline-<timestamp>.zip`** (contains `sdd-cli-0.1.0.tgz`, `INSTALL.md`, and the full-source zip). Share that zip over Lark / USB / internal drive. Recipients follow `INSTALL.md` inside the zip (global install via `npm install -g ./sdd-cli-0.1.0.tgz`).
+This runs `build`, `test`, `delivery:sync`, `npm pack`, `git archive` (full source with tests), and writes **`release/sdd-cli-offline-<timestamp>.zip`**. The zip contains:
+
+- `sdd-cli-0.1.0.tgz` — global install (`npm install -g ./sdd-cli-0.1.0.tgz`)
+- `INSTALL.md` — short tarball-focused steps
+- **`delivery/`** — full handoff copy (see `delivery/README.md` inside)
+- `*-full-source.zip` — optional full tree with tests
+
+Share the zip over Lark / USB / internal drive.
 
 ## License
 

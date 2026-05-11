@@ -10,7 +10,7 @@
     "bin",
     "dist",
     "scaffold",
-    "docs",
+    "delivery",
     ".notes",
     "README.md"
   ],
@@ -19,7 +19,8 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "bundle": "bash scripts/make-install-bundle.sh"
+    "bundle": "bash scripts/make-install-bundle.sh",
+    "delivery:sync": "bash scripts/sync-delivery-kit.sh"
   },
   "dependencies": {
     "chalk": "^5.3.0",
