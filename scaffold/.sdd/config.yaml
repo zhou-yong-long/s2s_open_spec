@@ -13,9 +13,6 @@ plugins:
   doctor: false
   diff: false
   workflow: false
-  board: false
-  git_hooks: false
-  ai: false
 extractors:
   ".ts": typescript
   ".py": python

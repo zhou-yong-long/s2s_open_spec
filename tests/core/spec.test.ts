@@ -62,6 +62,33 @@ status: draft
     expect(spec.frontmatter.domain).toBeNull();
     expect(spec.frontmatter.tags).toEqual([]);
   });
+
+  it("keeps unknown YAML keys in frontmatterExtra", () => {
+    const path = makeSpec(`---
+status: draft
+author: wade
+created: 2026-05-01
+domain: null
+tags: []
+links:
+  parent: null
+  related: []
+pinned_commit: null
+linked_files: []
+summary: "Short teaser for agents"
+detail_tier: minimal
+source:
+  system: feishu
+  doc_token: "abc123"
+---
+
+# Test
+`);
+    const spec = parseSpec(path);
+    expect(spec.frontmatterExtra.summary).toBe("Short teaser for agents");
+    expect(spec.frontmatterExtra.detail_tier).toBe("minimal");
+    expect((spec.frontmatterExtra.source as { system: string }).system).toBe("feishu");
+  });
 });
 
 describe("appendReviewLog", () => {
@@ -429,5 +456,31 @@ linked_files: []
     expect(reread.frontmatter.status).toBe("approved");
     expect(reread.frontmatter.pinned_commit).toBe("def456");
     expect(reread.frontmatter.author).toBe("wade");
+  });
+
+  it("preserves frontmatterExtra when updating core fields", () => {
+    const path = makeSpec(`---
+status: draft
+author: wade
+created: 2026-05-01
+domain: null
+tags: []
+links:
+  parent: null
+  related: []
+pinned_commit: null
+linked_files: []
+summary: keep-me
+---
+
+# Test
+`);
+    updateFrontmatter(path, { status: "ready" });
+    const reread = parseSpec(path);
+    expect(reread.frontmatter.status).toBe("ready");
+    expect(reread.frontmatterExtra.summary).toBe("keep-me");
+    const raw = readFileSync(path, "utf-8");
+    expect(raw).toContain("summary:");
+    expect(raw).toContain("keep-me");
   });
 });

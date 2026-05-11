@@ -56,6 +56,13 @@ sdd complete specs/active/2026-01-01-my-feature.md
 | `sdd doctor` | doctor | Health checks: stale specs, duplicates, mode suggestions |
 | `sdd diff <spec>` | diff | Detect drift between spec interfaces and code |
 
+When **`workflow: true`**, these commands are also available:
+
+| Command | Description |
+|---------|-------------|
+| `sdd threads <spec>` | List review threads on a spec |
+| `sdd resolve <spec> <index> -m "msg"` | Resolve a thread by index |
+
 ## Spec Lifecycle
 
 ```
@@ -90,7 +97,7 @@ version: "1"
 mode: flat              # flat | domain | team
 template: default       # minimal | default | full
 plugins:
-  workflow: false       # sdd review, sdd complete, sdd archive
+  workflow: false       # sdd review, complete, archive, threads, resolve
   diff: false           # sdd diff (spec-vs-code drift detection)
   doctor: false         # sdd doctor (project health checks)
 extractors:
@@ -112,11 +119,25 @@ Three templates included:
 
 Also includes templates for **Design Docs** and **ADR** (Architecture Decision Records).
 
+Additional templates in `scaffold/templates/` (copy or adapt; not all are wired to `sdd new --type`):
+
+| File | Use |
+|------|-----|
+| `feature-spec-pm.md` | PM-heavy spec: scope, AC, rollout |
+| `qa-from-spec.md` | QA checklist and traceability to the spec |
+
 ## AI Integration
 
 `sdd init` generates a `CLAUDE.md` that teaches AI agents the SDD workflow — checking specs before coding, respecting the status lifecycle, and knowing when to amend vs. create new specs.
 
 Compatible with Claude Code, Codex, and other AI coding assistants.
+
+See **[docs/karmastudio-sdd-delivery.md](docs/karmastudio-sdd-delivery.md)** for packaging SDD into an internal IDE (for example KarmaStudio), Feishu → Open Spec alignment, and the suggested file bundle for integration partners.
+
+### CLI vs design docs
+
+- The long-form design under `docs/superpowers/` may mention **`sdd plan`**; that command is **not implemented** in this repo yet. Use `status: in-progress` in frontmatter manually when implementation starts.
+- Optional YAML keys for tooling (for example `summary`, `detail_tier`, `source` from a Feishu sync) are **merged through** `parseSpec` / `updateFrontmatter`: they live in `frontmatterExtra` and are written back with the core fields so `sdd review` and similar commands do not drop them.
 
 ## Development
 

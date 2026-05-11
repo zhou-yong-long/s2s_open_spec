@@ -2,6 +2,8 @@
 
 This project uses Spec-Driven Development. Specs live in `specs/`.
 
+**Role-specific guides (for IDE rules / RAG):** [SDD-PM.md](./SDD-PM.md) (product), [SDD-QA.md](./SDD-QA.md) (quality). This file focuses on **development** gates and CLI commands.
+
 ## Rules
 
 Before writing ANY code for a new feature or behavior change:

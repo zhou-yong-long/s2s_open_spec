@@ -43,6 +43,8 @@ export interface ReviewThread {
 export interface Spec {
   filePath: string;
   frontmatter: SpecFrontmatter;
+  /** YAML keys other than core SDD frontmatter; preserved across `updateFrontmatter`. */
+  frontmatterExtra: Record<string, unknown>;
   body: string;
   changelog: ChangelogEntry[];
   reviewThreads: ReviewThread[];
@@ -50,38 +52,83 @@ export interface Spec {
 
 const YAML_RE = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 
+const CORE_FRONTMATTER_KEYS = new Set<string>([
+  "status",
+  "author",
+  "created",
+  "domain",
+  "tags",
+  "links",
+  "pinned_commit",
+  "linked_files",
+]);
+
+function coerceStatus(value: unknown): SpecStatus {
+  if (typeof value === "string" && (SPEC_STATUSES as readonly string[]).includes(value)) {
+    return value as SpecStatus;
+  }
+  return "draft";
+}
+
+function normalizeFrontmatter(parsed: Record<string, unknown>): SpecFrontmatter {
+  const p = parsed as Partial<SpecFrontmatter>;
+  return {
+    status: coerceStatus(p.status),
+    author: typeof p.author === "string" ? p.author : "",
+    created: typeof p.created === "string" ? p.created : "",
+    domain: p.domain === null || p.domain === undefined ? null : String(p.domain),
+    tags: Array.isArray(p.tags) ? (p.tags as unknown[]).map(String) : [],
+    links:
+      p.links && typeof p.links === "object" && !Array.isArray(p.links)
+        ? {
+            parent: (p.links as { parent?: unknown }).parent === null || (p.links as { parent?: unknown }).parent === undefined
+              ? null
+              : String((p.links as { parent: unknown }).parent),
+            related: Array.isArray((p.links as { related?: unknown }).related)
+              ? ((p.links as { related: unknown[] }).related as unknown[]).map(String)
+              : [],
+          }
+        : { parent: null, related: [] },
+    pinned_commit: p.pinned_commit === null || p.pinned_commit === undefined ? null : String(p.pinned_commit),
+    linked_files: Array.isArray(p.linked_files) ? (p.linked_files as unknown[]).map(String) : [],
+  };
+}
+
+function extraFromRaw(raw: Record<string, unknown>): Record<string, unknown> {
+  const extra: Record<string, unknown> = {};
+  for (const key of Object.keys(raw)) {
+    if (!CORE_FRONTMATTER_KEYS.has(key)) extra[key] = raw[key];
+  }
+  return extra;
+}
+
 export function parseSpec(filePath: string): Spec {
   const content = readFileSync(filePath, "utf-8");
   const match = content.match(YAML_RE);
 
   let frontmatter: SpecFrontmatter;
+  let frontmatterExtra: Record<string, unknown>;
   let body: string;
 
   if (match) {
-    const parsed = yaml.load(match[1]) as Partial<SpecFrontmatter>;
-    frontmatter = {
-      status: parsed?.status ?? "draft",
-      author: parsed?.author ?? "",
-      created: parsed?.created ?? "",
-      domain: parsed?.domain ?? null,
-      tags: parsed?.tags ?? [],
-      links: parsed?.links ?? { parent: null, related: [] },
-      pinned_commit: parsed?.pinned_commit ?? null,
-      linked_files: parsed?.linked_files ?? [],
-    };
+    const raw = (yaml.load(match[1]) as Record<string, unknown>) ?? {};
+    frontmatter = normalizeFrontmatter(raw);
+    frontmatterExtra = extraFromRaw(raw);
     body = match[2];
   } else {
     frontmatter = { status: "draft", author: "", created: "", domain: null, tags: [], links: { parent: null, related: [] }, pinned_commit: null, linked_files: [] };
+    frontmatterExtra = {};
     body = content;
   }
 
-  return { filePath, frontmatter, body, changelog: parseChangelog(body), reviewThreads: parseReviewThreads(body) };
+  return { filePath, frontmatter, frontmatterExtra, body, changelog: parseChangelog(body), reviewThreads: parseReviewThreads(body) };
 }
 
 export function updateFrontmatter(filePath: string, updates: Partial<SpecFrontmatter>): void {
   const spec = parseSpec(filePath);
   const merged = { ...spec.frontmatter, ...updates };
-  const yamlStr = yaml.dump(merged, { indent: 2, lineWidth: 120 });
+  const toDump = { ...spec.frontmatterExtra, ...merged };
+  const yamlStr = yaml.dump(toDump, { indent: 2, lineWidth: 120 });
   const newContent = `---\n${yamlStr}---\n${spec.body}`;
   writeFileSync(filePath, newContent);
 }

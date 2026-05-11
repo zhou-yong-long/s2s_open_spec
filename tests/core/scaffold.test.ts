@@ -26,5 +26,7 @@ describe("copyScaffold", () => {
     expect(existsSync(join(testDir, "specs/active/.gitkeep"))).toBe(true);
     expect(existsSync(join(testDir, ".sdd/config.yaml"))).toBe(true);
     expect(existsSync(join(testDir, "CLAUDE.md"))).toBe(true);
+    expect(existsSync(join(testDir, "SDD-PM.md"))).toBe(true);
+    expect(existsSync(join(testDir, "SDD-QA.md"))).toBe(true);
   });
 });
