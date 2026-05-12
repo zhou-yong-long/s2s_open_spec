@@ -1,6 +1,7 @@
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import yaml from "js-yaml";
+import chalk from "chalk";
 import { SPEC_STATUSES, type SpecStatus } from "../core/spec.js";
 import { readConfig } from "../core/config.js";
 
@@ -85,4 +86,71 @@ export function scanSpecs(projectRoot: string, options?: ScanOptions): BoardSpec
   if (options?.author) result = result.filter(s => s.author === options.author);
   if (options?.status) result = result.filter(s => s.status === options.status);
   return result;
+}
+
+const COLUMNS: { status: SpecStatus; label: string; colorFn: (text: string) => string }[] = [
+  { status: "draft", label: "draft", colorFn: chalk.gray },
+  { status: "ready", label: "ready", colorFn: chalk.cyan },
+  { status: "approved", label: "approved", colorFn: chalk.green },
+  { status: "in-progress", label: "in-progress", colorFn: chalk.yellow },
+  { status: "complete", label: "complete", colorFn: chalk.dim },
+];
+
+export interface RenderOptions {
+  colWidth?: number;
+  wide?: boolean;
+}
+
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1) + "…";
+}
+
+export function renderTerminal(specs: BoardSpec[], options: RenderOptions = {}): string {
+  if (specs.length === 0) {
+    return chalk.gray("No active specs found.");
+  }
+
+  const colWidth = options.colWidth || 16;
+  const lines: string[] = [];
+
+  const headerLine = COLUMNS.map(c => {
+    const padded = c.label.padEnd(colWidth);
+    return chalk.bold(padded);
+  }).join("│");
+  lines.push("┌" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┐");
+  lines.push("│" + headerLine + "│");
+  lines.push("├" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┤");
+
+  const byStatus = new Map<SpecStatus, BoardSpec[]>();
+  for (const c of COLUMNS) byStatus.set(c.status, []);
+  for (const s of specs) {
+    const arr = byStatus.get(s.status);
+    if (arr) arr.push(s);
+  }
+
+  const maxRows = Math.max(...COLUMNS.map(c => byStatus.get(c.status)?.length || 0), 1);
+
+  for (let row = 0; row < maxRows; row++) {
+    const cells = COLUMNS.map(col => {
+      const arr = byStatus.get(col.status) || [];
+      if (row >= arr.length) return " ".repeat(colWidth);
+      const spec = arr[row];
+      const title = truncate(spec.title, colWidth);
+      if (options.wide) {
+        const info = `${title} @${spec.author}`;
+        return col.colorFn(truncate(info, colWidth).padEnd(colWidth));
+      }
+      return col.colorFn(title.padEnd(colWidth));
+    });
+    lines.push("│" + cells.join("│") + "│");
+  }
+
+  lines.push("└" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┘");
+
+  const counts = COLUMNS.map(c => `${c.label}: ${byStatus.get(c.status)?.length || 0}`);
+  lines.push("");
+  lines.push(chalk.bold(`Total: ${specs.length} specs`) + " | " + counts.join(" | "));
+
+  return lines.join("\n");
 }

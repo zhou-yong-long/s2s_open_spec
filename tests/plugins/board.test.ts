@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { scanSpecs, type BoardSpec } from "../../src/plugins/board.js";
+import { scanSpecs, renderTerminal, type BoardSpec } from "../../src/plugins/board.js";
 import { mkdirSync, writeFileSync, rmSync } from "fs";
 import { join } from "path";
 
@@ -85,5 +85,43 @@ describe("scanSpecs", () => {
     const specs = scanSpecs(testDir, { status: "draft" });
     expect(specs.length).toBe(1);
     expect(specs[0].status).toBe("draft");
+  });
+});
+
+describe("renderTerminal", () => {
+  it("renders empty board message", () => {
+    const specs: BoardSpec[] = [];
+    const output = renderTerminal(specs, {});
+    expect(output).toContain("No active specs found");
+  });
+
+  it("renders specs grouped by status", () => {
+    const specs: BoardSpec[] = [
+      { fileName: "a.md", title: "Auth", status: "draft", author: "alice", domain: null, created: "2026-05-01", tags: [] },
+      { fileName: "b.md", title: "API", status: "approved", author: "bob", domain: "api", created: "2026-05-02", tags: ["urgent"] },
+    ];
+    const output = renderTerminal(specs, {});
+    expect(output).toContain("draft");
+    expect(output).toContain("approved");
+    expect(output).toContain("Auth");
+    expect(output).toContain("API");
+  });
+
+  it("shows summary line", () => {
+    const specs: BoardSpec[] = [
+      { fileName: "a.md", title: "A", status: "draft", author: "x", domain: null, created: "", tags: [] },
+      { fileName: "b.md", title: "B", status: "draft", author: "y", domain: null, created: "", tags: [] },
+    ];
+    const output = renderTerminal(specs, {});
+    expect(output).toMatch(/Total:\s*2/);
+    expect(output).toMatch(/draft:\s*2/);
+  });
+
+  it("truncates long titles in narrow columns", () => {
+    const specs: BoardSpec[] = [
+      { fileName: "a.md", title: "This Is A Very Long Spec Title That Should Be Truncated", status: "draft", author: "x", domain: null, created: "", tags: [] },
+    ];
+    const output = renderTerminal(specs, { colWidth: 16 });
+    expect(output.length).toBeGreaterThan(0);
   });
 });
