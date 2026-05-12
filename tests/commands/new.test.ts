@@ -97,4 +97,27 @@ describe("sdd new", () => {
   it("exits non-zero when name sanitizes to empty", () => {
     runExpectFail('new "!!!"', testDir).toThrow();
   });
+
+  it("refuses to overwrite an existing spec file", () => {
+    run("new user-auth", testDir);
+    runExpectFail("new user-auth", testDir).toThrow();
+  });
+
+  it("refuses to overwrite an existing PM spec file", () => {
+    run("new user-auth --type feature-spec-pm", testDir);
+    runExpectFail("new user-auth --type feature-spec-pm", testDir).toThrow();
+  });
+
+  it("refuses cross-type collision between feature-spec and design-doc", () => {
+    run("new user-auth", testDir);
+    runExpectFail("new user-auth --type design-doc", testDir).toThrow();
+  });
+
+  it("allows different roles to create specs with same title", () => {
+    run("new user-auth", testDir);
+    run("new user-auth --type feature-spec-pm", testDir);
+    run("new user-auth --type qa-from-spec", testDir);
+    const files = readdirSync(join(testDir, "specs/active"));
+    expect(files.filter((f) => f.includes("user-auth"))).toHaveLength(3);
+  });
 });

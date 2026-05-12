@@ -108,6 +108,11 @@ export const newCommand: CommandModule<{}, NewArgs> = {
     });
 
     const specPath = join(activeDir, filename);
+    if (existsSync(specPath)) {
+      console.error(chalk.red(`✘ Spec already exists: ${specPath}`));
+      console.error(chalk.yellow("Use a different title, or amend the existing spec with: sdd amend <spec-file>"));
+      process.exit(1);
+    }
     writeFileSync(specPath, content);
     console.log(chalk.green(`Created: ${specPath}`));
 
