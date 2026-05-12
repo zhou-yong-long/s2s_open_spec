@@ -155,3 +155,100 @@ export function renderTerminal(specs: BoardSpec[], options: RenderOptions = {}):
 
   return lines.join("\n");
 }
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+export function generateHTML(specs: BoardSpec[]): string {
+  const statusLabels: Record<string, string> = {
+    draft: "Draft",
+    ready: "Ready",
+    approved: "Approved",
+    "in-progress": "In Progress",
+    complete: "Complete",
+  };
+
+  const statusColors: Record<string, string> = {
+    draft: "#6b7280",
+    ready: "#06b6d4",
+    approved: "#22c55e",
+    "in-progress": "#eab308",
+    complete: "#9ca3af",
+  };
+
+  const byStatus: Record<string, BoardSpec[]> = {};
+  for (const s of Object.keys(statusLabels)) byStatus[s] = [];
+  for (const spec of specs) {
+    if (byStatus[spec.status]) byStatus[spec.status].push(spec);
+  }
+
+  const columnsHtml = Object.entries(statusLabels).map(([status, label]) => {
+    const items = byStatus[status] || [];
+    const cards = items.map(spec => {
+      const domainBadge = spec.domain
+        ? `<span class="badge">${escapeHtml(spec.domain)}</span>`
+        : "";
+      const tagsHtml = spec.tags.length > 0
+        ? spec.tags.map(t => `<span class="badge tag">${escapeHtml(t)}</span>`).join("")
+        : "";
+      return `<div class="card">
+        <div class="card-title">${escapeHtml(spec.title)}</div>
+        <div class="card-meta">@${escapeHtml(spec.author)}${spec.created ? " · " + escapeHtml(spec.created) : ""}</div>
+        ${domainBadge}${tagsHtml}
+      </div>`;
+    }).join("");
+
+    const emptyState = items.length === 0
+      ? '<div class="empty">No specs</div>'
+      : "";
+
+    return `<div class="column" data-status="${status}">
+      <div class="column-header" style="border-top: 3px solid ${statusColors[status]}">
+        <h2>${label}</h2>
+        <span class="count">${items.length}</span>
+      </div>
+      ${cards}${emptyState}
+    </div>`;
+  }).join("");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDD Board</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f3f4f6;color:#1f2937;padding:20px}
+h1{font-size:24px;margin-bottom:16px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+#search{padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;width:280px;font-size:14px}
+#search:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+.board{display:flex;gap:16px;overflow-x:auto;padding-bottom:20px}
+.column{flex:1;min-width:200px;background:#e5e7eb;border-radius:8px;padding:12px}
+.column-header{display:flex;justify-content:space-between;align-items:center;padding:8px 0;margin-bottom:12px}
+.column-header h2{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.count{background:#d1d5db;border-radius:9999px;padding:2px 8px;font-size:12px;font-weight:500}
+.card{background:#fff;border-radius:6px;padding:12px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.card-title{font-weight:500;margin-bottom:4px}
+.card-meta{font-size:12px;color:#6b7280;margin-bottom:6px}
+.badge{display:inline-block;background:#e5e7eb;border-radius:4px;padding:2px 6px;font-size:11px;margin-right:4px;margin-bottom:4px}
+.badge.tag{background:#dbeafe;color:#1d4ed8}
+.empty{text-align:center;color:#9ca3af;padding:20px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>SDD Board</h1>
+  <input type="text" id="search" placeholder="Search specs..." oninput="filterSpecs()">
+</div>
+<div class="board" id="board">
+  ${columnsHtml}
+</div>
+<script>
+function filterSpecs(){const q=document.getElementById("search").value.toLowerCase();document.querySelectorAll(".card").forEach(c=>{const t=c.querySelector(".card-title").textContent.toLowerCase();c.style.display=t.includes(q)?"":"none"});document.querySelectorAll(".column").forEach(col=>{const visible=col.querySelectorAll(".card[style=''], .card:not([style])");const empty=col.querySelector(".empty");if(empty)empty.style.display=visible.length===0?"":"none"})}
+</script>
+</body>
+</html>`;
+}

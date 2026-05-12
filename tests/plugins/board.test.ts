@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { scanSpecs, renderTerminal, type BoardSpec } from "../../src/plugins/board.js";
+import { scanSpecs, renderTerminal, generateHTML, type BoardSpec } from "../../src/plugins/board.js";
 import { mkdirSync, writeFileSync, rmSync } from "fs";
 import { join } from "path";
 
@@ -132,5 +132,34 @@ describe("renderTerminal", () => {
     ];
     const output = renderTerminal(specs, { wide: true });
     expect(output).toContain("@alice");
+  });
+});
+
+describe("generateHTML", () => {
+  it("generates valid HTML with spec data", () => {
+    const specs: BoardSpec[] = [
+      { fileName: "a.md", title: "Auth", status: "draft", author: "alice", domain: null, created: "2026-05-01", tags: [] },
+    ];
+    const html = generateHTML(specs);
+    expect(html).toContain("<!DOCTYPE html>");
+    expect(html).toContain("Auth");
+    expect(html).toContain("alice");
+    expect(html).toContain("draft");
+  });
+
+  it("includes search functionality", () => {
+    const specs: BoardSpec[] = [];
+    const html = generateHTML(specs);
+    expect(html).toContain("search");
+    expect(html).toContain("filterSpecs");
+  });
+
+  it("includes all 5 status columns", () => {
+    const html = generateHTML([]);
+    expect(html).toContain("draft");
+    expect(html).toContain("ready");
+    expect(html).toContain("approved");
+    expect(html).toContain("in-progress");
+    expect(html).toContain("complete");
   });
 });
