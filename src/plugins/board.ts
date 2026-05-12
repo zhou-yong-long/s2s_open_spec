@@ -1,7 +1,7 @@
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import yaml from "js-yaml";
-import type { SpecStatus } from "../core/spec.js";
+import { SPEC_STATUSES, type SpecStatus } from "../core/spec.js";
 import type { Config } from "../core/config.js";
 
 export interface BoardSpec {
@@ -20,10 +20,8 @@ export interface ScanOptions {
   status?: string;
 }
 
-const VALID_STATUSES: readonly string[] = ["draft", "ready", "approved", "in-progress", "complete", "archived"];
-
 function coerceStatus(value: unknown): SpecStatus {
-  if (typeof value === "string" && VALID_STATUSES.includes(value)) {
+  if (typeof value === "string" && (SPEC_STATUSES as readonly string[]).includes(value)) {
     return value as SpecStatus;
   }
   return "draft";
@@ -86,14 +84,9 @@ export function scanSpecs(projectRoot: string, options?: ScanOptions): BoardSpec
     });
   }
 
-  if (options?.domain) {
-    return specs.filter(s => s.domain === options.domain);
-  }
-  if (options?.author) {
-    return specs.filter(s => s.author === options.author);
-  }
-  if (options?.status) {
-    return specs.filter(s => s.status === options.status);
-  }
-  return specs;
+  let result = specs;
+  if (options?.domain) result = result.filter(s => s.domain === options.domain);
+  if (options?.author) result = result.filter(s => s.author === options.author);
+  if (options?.status) result = result.filter(s => s.status === options.status);
+  return result;
 }
