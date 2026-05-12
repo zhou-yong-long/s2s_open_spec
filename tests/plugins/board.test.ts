@@ -125,4 +125,12 @@ describe("renderTerminal", () => {
     expect(output).toContain("…");
     expect(output).not.toContain("This Is A Very Long Spec Title That Should Be Truncated");
   });
+
+  it("shows author info in wide mode", () => {
+    const specs: BoardSpec[] = [
+      { fileName: "a.md", title: "Auth", status: "draft", author: "alice", domain: null, created: "", tags: [] },
+    ];
+    const output = renderTerminal(specs, { wide: true });
+    expect(output).toContain("@alice");
+  });
 });

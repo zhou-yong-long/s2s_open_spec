@@ -118,9 +118,10 @@ export function renderTerminal(specs: BoardSpec[], options: RenderOptions = {}):
     const padded = c.label.padEnd(colWidth);
     return chalk.bold(padded);
   }).join("│");
-  lines.push("┌" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┬" + "─".repeat(colWidth) + "┐");
+  const sep = "─".repeat(colWidth);
+  lines.push("┌" + COLUMNS.map(() => sep).join("┬") + "┐");
   lines.push("│" + headerLine + "│");
-  lines.push("├" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┼" + "─".repeat(colWidth) + "┤");
+  lines.push("├" + COLUMNS.map(() => sep).join("┼") + "┤");
 
   const byStatus = new Map<SpecStatus, BoardSpec[]>();
   for (const c of COLUMNS) byStatus.set(c.status, []);
@@ -136,17 +137,17 @@ export function renderTerminal(specs: BoardSpec[], options: RenderOptions = {}):
       const arr = byStatus.get(col.status) || [];
       if (row >= arr.length) return " ".repeat(colWidth);
       const spec = arr[row];
-      const title = truncate(spec.title, colWidth);
       if (options.wide) {
-        const info = `${title} @${spec.author}`;
+        const info = `${spec.title} @${spec.author}`;
         return col.colorFn(truncate(info, colWidth).padEnd(colWidth));
       }
+      const title = truncate(spec.title, colWidth);
       return col.colorFn(title.padEnd(colWidth));
     });
     lines.push("│" + cells.join("│") + "│");
   }
 
-  lines.push("└" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┴" + "─".repeat(colWidth) + "┘");
+  lines.push("└" + COLUMNS.map(() => sep).join("┴") + "┘");
 
   const counts = COLUMNS.map(c => `${c.label}: ${byStatus.get(c.status)?.length || 0}`);
   lines.push("");
