@@ -4,17 +4,41 @@ import { readConfig } from "../core/config.js";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import chalk from "chalk";
+export type { InterfaceShape } from "../extractors/typescript.js";
 import type { InterfaceShape } from "../extractors/typescript.js";
 
-export function compareInterfaces(
-  specShapes: InterfaceShape[],
-  codeShapes: InterfaceShape[]
-): { missing: string[]; extra: string[] }[] {
-  const specNames = new Set(specShapes.map((s) => s.name));
-  const codeNames = new Set(codeShapes.map((s) => s.name));
-  const missing = [...specNames].filter((n) => !codeNames.has(n));
-  const extra = [...codeNames].filter((n) => !specNames.has(n));
-  return [{ missing, extra }];
+export interface DiffResult {
+  missing: { name: string; signature?: string }[];
+  extra: { name: string; signature?: string }[];
+  signatureMismatch: { name: string; spec: string; code: string }[];
+}
+
+export function compareInterfaces(specShapes: InterfaceShape[], codeShapes: InterfaceShape[]): DiffResult {
+  const specMap = new Map(specShapes.map((s) => [s.name, s]));
+  const codeMap = new Map(codeShapes.map((s) => [s.name, s]));
+
+  const missing: { name: string; signature?: string }[] = [];
+  const extra: { name: string; signature?: string }[] = [];
+  const signatureMismatch: { name: string; spec: string; code: string }[] = [];
+
+  for (const [name, specShape] of specMap) {
+    const codeShape = codeMap.get(name);
+    if (!codeShape) {
+      missing.push({ name, signature: specShape.signature });
+    } else if (specShape.params && codeShape.params && specShape.params !== codeShape.params) {
+      signatureMismatch.push({ name, spec: specShape.signature, code: codeShape.signature });
+    } else if (specShape.returnType && codeShape.returnType && specShape.returnType !== codeShape.returnType) {
+      signatureMismatch.push({ name, spec: specShape.signature, code: codeShape.signature });
+    }
+  }
+
+  for (const [name, codeShape] of codeMap) {
+    if (!specMap.has(name)) {
+      extra.push({ name, signature: codeShape.signature });
+    }
+  }
+
+  return { missing, extra, signatureMismatch };
 }
 
 function parseSpecInterfaces(body: string): InterfaceShape[] {
@@ -64,20 +88,40 @@ const diffCommand: CommandModule = {
         codeShapes.push(...parseTsInterfaces(content, fullPath));
       } else if (ext === ".py") {
         const { parsePyInterfaces } = await import("../extractors/python.js");
-        codeShapes.push(...parsePyInterfaces(content, fullPath));
+        codeShapes.push(...(await parsePyInterfaces(content, fullPath)));
+      } else if (ext === ".java") {
+        const { parseJavaInterfaces } = await import("../extractors/java.js");
+        codeShapes.push(...(await parseJavaInterfaces(content, fullPath)));
+      } else if (ext === ".go") {
+        const { parseGoInterfaces } = await import("../extractors/go.js");
+        codeShapes.push(...(await parseGoInterfaces(content, fullPath)));
       }
     }
 
     const results = compareInterfaces(specShapes, codeShapes);
-    if (results[0].missing.length === 0) {
+    const hasIssues = results.missing.length > 0 || results.extra.length > 0 || results.signatureMismatch.length > 0;
+
+    if (!hasIssues) {
       console.log(chalk.green("Spec interfaces match code."));
     } else {
       console.log(chalk.red("Mismatches detected:"));
-      if (results[0].missing.length > 0) {
-        console.log(chalk.yellow(`  In spec but not in code: ${results[0].missing.join(", ")}`));
+      if (results.missing.length > 0) {
+        console.log(chalk.yellow(`  In spec but not in code:`));
+        for (const m of results.missing) {
+          console.log(chalk.yellow(`    - ${m.name}${m.signature ? ` (${m.signature})` : ""}`));
+        }
       }
-      if (results[0].extra.length > 0) {
-        console.log(chalk.yellow(`  In code but not in spec: ${results[0].extra.join(", ")}`));
+      if (results.extra.length > 0) {
+        console.log(chalk.yellow(`  In code but not in spec:`));
+        for (const e of results.extra) {
+          console.log(chalk.yellow(`    + ${e.name}${e.signature ? ` (${e.signature})` : ""}`));
+        }
+      }
+      if (results.signatureMismatch.length > 0) {
+        console.log(chalk.yellow(`  Signature mismatches:`));
+        for (const m of results.signatureMismatch) {
+          console.log(chalk.yellow(`    ~ ${m.name}: spec="${m.spec}" code="${m.code}"`));
+        }
       }
     }
   },
