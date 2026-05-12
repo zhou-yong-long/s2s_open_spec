@@ -10,6 +10,7 @@ SDD (Spec-Driven Development) adds a lightweight specification gate before codin
 - **Get approval** — specs pass a review gate before implementation begins
 - **Code to spec** — implementation follows the approved interfaces
 - **Stay in sync** — diff tool detects drift between spec and code
+- **Visualize progress** — kanban board shows all active specs at a glance
 
 ## Quick Start
 
@@ -37,6 +38,12 @@ sdd review specs/active/2026-01-01-my-feature.md --self
 # Detect spec-vs-code drift
 sdd diff specs/active/2026-01-01-my-feature.md
 
+# View all active specs on a kanban board
+sdd board
+
+# Open the board in your browser
+sdd board --ui
+
 # Mark complete when done
 sdd complete specs/active/2026-01-01-my-feature.md
 ```
@@ -61,6 +68,7 @@ sdd complete specs/active/2026-01-01-my-feature.md
 | `sdd archive <spec>` | workflow | Archive a spec (not completed) |
 | `sdd doctor` | doctor | Health checks: stale specs, duplicates, mode suggestions |
 | `sdd diff <spec>` | diff | Detect drift between spec interfaces and code |
+| `sdd board` | board | Display a kanban-style board of all active specs |
 
 When **`workflow: true`**, these commands are also available:
 
@@ -68,6 +76,17 @@ When **`workflow: true`**, these commands are also available:
 |---------|-------------|
 | `sdd threads <spec>` | List review threads on a spec |
 | `sdd resolve <spec> <index> -m "msg"` | Resolve a thread by index |
+
+### Board Plugin
+
+| Command | Description |
+|---------|-------------|
+| `sdd board` | Terminal kanban table with color-coded status columns |
+| `sdd board --ui` | Open interactive board in browser (searchable, read-only) |
+| `sdd board --domain <name>` | Filter specs by domain |
+| `sdd board --author <name>` | Filter specs by author |
+| `sdd board --status <status>` | Show only one status column |
+| `sdd board --wide` | Show author info alongside spec titles |
 
 ## Spec Lifecycle
 
@@ -103,12 +122,15 @@ version: "1"
 mode: flat              # flat | domain | team
 template: default       # minimal | default | full
 plugins:
-  workflow: false       # sdd review, complete, archive, threads, resolve
-  diff: false           # sdd diff (spec-vs-code drift detection)
-  doctor: false         # sdd doctor (project health checks)
+  workflow: true        # sdd review, complete, archive, threads, resolve
+  diff: true            # sdd diff (spec-vs-code drift detection)
+  doctor: true          # sdd doctor (project health checks)
+  board: true           # sdd board (kanban visualization)
 extractors:
   ".ts": typescript     # diff plugin extracts TS function/route signatures
   ".py": python         # diff plugin extracts Python function/route signatures
+  ".go": go             # diff plugin extracts Go function/route signatures
+  ".java": java         # diff plugin extracts Java function/route signatures
 ```
 
 Enable plugins by setting them to `true`.
@@ -142,7 +164,7 @@ Compatible with Claude Code, Codex, and other AI coding assistants.
 
 See **[docs/karmastudio-sdd-delivery.md](docs/karmastudio-sdd-delivery.md)** for packaging SDD into an internal IDE (for example KarmaStudio), Feishu → Open Spec alignment, and the suggested file bundle for integration partners.
 
-**One-folder handoff (install + usage + AI prompts + examples):** **[`delivery/`](delivery/README.md)** — synced from `docs/` via `npm run delivery:sync`. Same prompts also live under [docs/ai-delivery](docs/ai-delivery/README.md). Install from branch **`feature/sdd-karmastudio-pack`**, not **`main`**.
+**One-folder handoff (install + usage + AI prompts + examples):** **[`delivery/`](delivery/README.md)** — synced from `docs/` via `npm run delivery:sync`. Same prompts also live under [docs/ai-delivery](docs/ai-delivery/README.md).
 
 ### CLI vs design docs
 
@@ -162,11 +184,12 @@ npm run dev -- new my-feature
 
 # Run tests
 npm test
+
+# Build release bundle
+npm run bundle
 ```
 
-### Offline install bundle (no `git push` needed)
-
-From a clean checkout of branch `feature/sdd-karmastudio-pack`:
+### Offline install bundle
 
 ```bash
 npm run bundle
