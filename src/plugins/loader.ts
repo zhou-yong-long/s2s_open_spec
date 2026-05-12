@@ -23,6 +23,10 @@ export async function loadPlugins(config: Config, cwd: string): Promise<CommandM
     const p = await import("./diff.js");
     commands.push(...Object.values(p.default.commands));
   }
+  if (plugins.board) {
+    const p = await import("./board.js");
+    commands.push(...Object.values(p.default.commands));
+  }
 
   return commands;
 }

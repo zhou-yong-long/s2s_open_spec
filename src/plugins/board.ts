@@ -2,6 +2,9 @@ import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import yaml from "js-yaml";
 import chalk from "chalk";
+import { createServer, Server } from "http";
+import { exec } from "child_process";
+import type { CommandModule } from "yargs";
 import { SPEC_STATUSES, type SpecStatus } from "../core/spec.js";
 import { readConfig } from "../core/config.js";
 
@@ -252,3 +255,98 @@ function filterSpecs(){const q=document.getElementById("search").value.toLowerCa
 </body>
 </html>`;
 }
+
+function findAvailablePort(startPort: number, maxRetries: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    let retries = 0;
+    function tryPort(port: number) {
+      const server = createServer();
+      server.on("error", () => {
+        server.close();
+        retries++;
+        if (retries > maxRetries) reject(new Error("No available port found"));
+        else tryPort(port + 1);
+      });
+      server.on("listening", () => {
+        server.close();
+        resolve(port);
+      });
+      server.listen(port, "127.0.0.1");
+    }
+    tryPort(startPort);
+  });
+}
+
+export function renderUI(specs: BoardSpec[]): void {
+  const html = generateHTML(specs);
+  let requestCount = 0;
+  let server: Server;
+
+  findAvailablePort(3456, 5).then(port => {
+    server = createServer((req, res) => {
+      requestCount++;
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(html);
+    });
+
+    server.listen(port, "127.0.0.1", () => {
+      const url = `http://127.0.0.1:${port}`;
+      console.log(chalk.green(`Board UI: ${url}`));
+      console.log(chalk.gray("Press Ctrl+C to stop"));
+
+      const openCmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+      exec(`${openCmd} "${url}"`);
+
+      const inactivityTimer = setInterval(() => {
+        if (requestCount === 0) {
+          clearInterval(inactivityTimer);
+          server.close();
+          process.exit(0);
+        }
+        requestCount = 0;
+      }, 300_000);
+    });
+  }).catch(err => {
+    console.error(chalk.red(`Failed to start board UI: ${err.message}`));
+    console.log(chalk.yellow("Falling back to terminal mode:"));
+    console.log(renderTerminal(specs, {}));
+  });
+}
+
+const boardCommand: CommandModule = {
+  command: "board",
+  describe: "Display a kanban-style board of all active specs",
+  builder: (yargs) =>
+    yargs
+      .option("ui", { type: "boolean", describe: "Open board in browser" })
+      .option("domain", { type: "string", describe: "Filter by domain" })
+      .option("author", { type: "string", describe: "Filter by author" })
+      .option("status", { type: "string", describe: "Filter by status" })
+      .option("wide", { type: "boolean", describe: "Show extra details" }),
+  handler: (argv) => {
+    const cwd = process.cwd();
+    const options: ScanOptions = {};
+    if (argv.domain) options.domain = argv.domain as string;
+    if (argv.author) options.author = argv.author as string;
+    if (argv.status) options.status = argv.status as SpecStatus;
+
+    const specs = scanSpecs(cwd, options);
+
+    if (argv.ui) {
+      renderUI(specs);
+    } else {
+      const renderOpts: RenderOptions = { wide: argv.wide as boolean };
+      try {
+        const cols = process.stdout.columns || 80;
+        renderOpts.colWidth = Math.max(14, Math.floor((cols - 6) / 5));
+      } catch { /* use default */ }
+      console.log(renderTerminal(specs, renderOpts));
+    }
+  },
+};
+
+export default {
+  name: "board",
+  description: "Display a kanban-style board of all active specs",
+  commands: { board: boardCommand },
+};
