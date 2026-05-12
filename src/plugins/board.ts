@@ -2,7 +2,7 @@ import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from "path";
 import yaml from "js-yaml";
 import { SPEC_STATUSES, type SpecStatus } from "../core/spec.js";
-import type { Config } from "../core/config.js";
+import { readConfig } from "../core/config.js";
 
 export interface BoardSpec {
   fileName: string;
@@ -17,7 +17,7 @@ export interface BoardSpec {
 export interface ScanOptions {
   domain?: string;
   author?: string;
-  status?: string;
+  status?: SpecStatus;
 }
 
 function coerceStatus(value: unknown): SpecStatus {
@@ -61,16 +61,12 @@ function scanDir(dir: string): { fileName: string; filePath: string }[] {
 }
 
 export function scanSpecs(projectRoot: string, options?: ScanOptions): BoardSpec[] {
-  const configPath = join(projectRoot, ".sdd", "config.yaml");
-  let activeDir = join(projectRoot, "specs/active");
-  if (existsSync(configPath)) {
-    try {
-      const raw = readFileSync(configPath, "utf-8");
-      const cfg = yaml.load(raw) as Partial<Config>;
-      if (cfg?.paths?.active) {
-        activeDir = join(projectRoot, cfg.paths.active);
-      }
-    } catch { /* use default */ }
+  let activeDir: string;
+  try {
+    const config = readConfig(projectRoot);
+    activeDir = join(projectRoot, config.paths.active);
+  } catch {
+    activeDir = join(projectRoot, "specs/active");
   }
 
   const files = scanDir(activeDir);
