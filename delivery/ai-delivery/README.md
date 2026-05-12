@@ -10,7 +10,7 @@
 |------|------|
 | [01-prompt-install-sdd-cli.md](./01-prompt-install-sdd-cli.md) | 安装 Prompt（含分支约束） |
 | [02-prompt-integrate-into-ide.md](./02-prompt-integrate-into-ide.md) | IDE 集成 Prompt |
-| [03-examples-pm-dev-qa-full-chain.md](./03-examples-pm-dev-qa-full-chain.md) | PM、Dev、QA 各一份用例 + 串联时间线 |
+| [03-examples-pm-dev-qa-full-chain.md](./03-examples-pm-dev-qa-full-chain.md) | 全链路叙事：需求、产物、卡点、阶段、模拟输入/输出、人工介入点 |
 | [04-supplement-checklist.md](./04-supplement-checklist.md) | 清单、分支策略、FAQ、自证命令 |
 
 更多背景见 [KarmaStudio / SDD 集成交付说明](../karmastudio-sdd-delivery.md) 与仓库根 [README.md](../../README.md)。
