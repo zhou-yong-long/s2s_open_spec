@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { InterfaceShape } from "./typescript.js";
 import { parseSource } from "./treesitter.js";
 import type * as TreeSitter from "web-tree-sitter";

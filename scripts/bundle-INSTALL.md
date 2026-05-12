@@ -34,13 +34,11 @@ cd /path/to/your-app
 sdd init
 ```
 
-## 交付线分支说明
-
-本包由分支 **`feature/sdd-karmastudio-pack`** 构建；与 `main` 可能不一致。
+## 交付文档说明
 
 - **完整交付文档**：解压本 zip 后打开 **`delivery/README.md`**（安装、使用、AI Prompt、集成说明的索引）。
-- **仅 tgz 内**：安装后可在全局包目录下找到 `node_modules/sdd-cli/delivery/`（若当前 npm 包已包含 `delivery/`）。
 - **AI 安装 Prompt 原文**：`delivery/ai-delivery/01-prompt-install-sdd-cli.md`。
+- 注意：`delivery/` 仅存在于离线 zip 和 Git 仓库中，**不会**随 `npm install -g` 安装到全局。
 
 ## 版本
 

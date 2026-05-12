@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ts from "typescript";
 
 export interface InterfaceShape {

@@ -23,7 +23,7 @@
 
 标题含空格时请加引号：`sdd new "My Feature" --type feature-spec-pm`。
 
-### 插件（在 `.sdd/config.yaml` 中 `plugins.*: true`）
+### 插件（在 `.sdd/config.yaml` 中 `plugins.*: true`，默认全部开启）
 
 | 命令 | 插件 | 说明 |
 |------|------|------|
@@ -32,10 +32,13 @@
 | `sdd resolve <spec> <index> -m "msg"` | workflow | 解决线程 |
 | `sdd complete <spec>` | workflow | 完成并归档 |
 | `sdd archive <spec>` | workflow | 归档未完成规格 |
-| `sdd diff <spec>` | diff | 规格接口与代码漂移 |
+| `sdd diff <spec>` | diff | 规格接口与代码漂移（支持 `.ts`/`.py`/`.go`/`.java`） |
 | `sdd doctor` | doctor | 项目健康检查 |
-
-团队使用建议：**`workflow: true`**；按需开启 `diff`、`doctor`。
+| `sdd board` | board | 看板视图（终端表格 + 浏览器 UI） |
+| `sdd board --ui` | board | 在浏览器中打开可搜索的看板 |
+| `sdd board --domain <name>` | board | 按 domain 过滤 |
+| `sdd board --author <name>` | board | 按 author 过滤 |
+| `sdd board --wide` | board | 显示作者信息 |
 
 ## 规格生命周期（摘要）
 
@@ -56,11 +59,14 @@ mode: flat
 template: default
 plugins:
   workflow: true
-  diff: false
-  doctor: false
+  diff: true
+  doctor: true
+  board: true
 extractors:
   ".ts": typescript
   ".py": python
+  ".go": go
+  ".java": java
 ```
 
 ## 更多文档

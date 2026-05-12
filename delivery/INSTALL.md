@@ -2,17 +2,17 @@
 
 ## 交付线与分支（必读）
 
-本交付线的功能与文档以 Git 分支 **`feature/sdd-karmastudio-pack`** 为准；**不要**默认使用 `main` 上的代码或 npm 公共包代替本线，也**不要**在未与团队确认前把本线合并进 `main`。
+本交付线的功能与文档以 Git 分支 **`main`** 为准。
 
 ---
 
 ## 方式一：离线 zip（推荐，无需 GitHub 写权限）
 
-1. 取得 **`sdd-cli-offline-*.zip`**（由维护者在仓库根执行 `npm run bundle` 生成，位于其本机 `release/`）。
+1. 取得 **`sdd-cli-offline-*.zip`**（由维护者在仓库根执行 `npm run bundle` 生成，位于 `release/`）。
 2. 解压后可见：
    - **`sdd-cli-0.1.0.tgz`** — 已含编译产物 `dist/`，**无需**全局安装 `tsx`。
    - **`INSTALL-OFFLINE-TGZ.md`** — 与下述「方式二」相同，针对 tgz 的一步安装。
-   - **`delivery/`** — 本交付文件夹副本（安装后也可在全局包内 `node_modules/sdd-cli/delivery/` 查看，若已打进 npm 包）。
+   - **`delivery/`** — 本交付文件夹副本（安装说明、AI Prompt、USAGE 等）。
    - **`*-full-source.zip`**（可选）— 含 `src/`、`tests/`，便于二次开发。
 
 全局安装：
@@ -42,8 +42,6 @@ npm install -g ./sdd-cli-0.1.0.tgz
 ```bash
 git clone <仓库 URL> s2s_open_spec
 cd s2s_open_spec
-git fetch origin
-git checkout feature/sdd-karmastudio-pack
 npm install
 npm run build
 npm link
@@ -60,7 +58,7 @@ cd /path/to/your-app
 sdd init
 ```
 
-按需编辑 `.sdd/config.yaml`（例如 `plugins.workflow: true`）。详见 [USAGE.md](./USAGE.md)。
+默认已开启所有插件（`workflow`、`diff`、`doctor`、`board`）。如需关闭，编辑 `.sdd/config.yaml`。详见 [USAGE.md](./USAGE.md)。
 
 ---
 

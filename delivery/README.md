@@ -4,7 +4,7 @@
 
 | 文件 / 目录 | 说明 |
 |-------------|------|
-| [INSTALL.md](./INSTALL.md) | **安装总览**（离线 zip、单独 tgz、Git 分支三种方式 + 分支约束） |
+| [INSTALL.md](./INSTALL.md) | **安装总览**（离线 zip、单独 tgz、Git 分支三种方式） |
 | [USAGE.md](./USAGE.md) | **使用说明**（常用命令、`sdd new --type`、插件与生命周期） |
 | [INSTALL-OFFLINE-TGZ.md](./INSTALL-OFFLINE-TGZ.md) | 仅针对 `sdd-cli-*.tgz` / 外层离线 zip 内安装步骤（由脚本同步自 `scripts/bundle-INSTALL.md`） |
 | [karmastudio-sdd-delivery.md](./karmastudio-sdd-delivery.md) | KarmaStudio / 飞书 / Open Spec 对齐（与 `docs/` 同步） |
@@ -23,4 +23,4 @@ npm run delivery:sync
 ## 与离线 zip / npm 包的关系
 
 - 执行 `npm run bundle` 打出的 **`release/sdd-cli-offline-*.zip`** 内会附带本 **`delivery/`** 目录副本。
-- 发布用 **`npm pack` 生成的 `.tgz`** 内含 **`delivery/`**（不再重复打包 `docs/`，避免与 `delivery/` 镜像重复）；安装后路径示例：`node_modules/sdd-cli/delivery/README.md`。
+- **`npm pack` 生成的 `.tgz`** 仅包含 CLI 运行所需文件（`bin/`、`dist/`、`scaffold/`），**不包含** `delivery/`。交付文档仅存在于离线 zip 和 Git 仓库中。

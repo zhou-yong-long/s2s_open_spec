@@ -38,5 +38,5 @@ export async function parseSource(langName: "python" | "java" | "go", source: st
   const parser = await getParser();
   const lang = await getLanguage(langName);
   parser.setLanguage(lang);
-  return parser.parse(source);
+  return parser.parse(source)!;
 }
