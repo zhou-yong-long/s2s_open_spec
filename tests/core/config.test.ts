@@ -38,7 +38,7 @@ describe("readConfig", () => {
     const config = readConfig(testDir);
     expect(config.plugins.doctor).toBe(true);
     expect(config.plugins.diff).toBe(true);
-    expect(config.plugins.workflow).toBe(false);
+    expect(config.plugins.workflow).toBe(true);
   });
 });
 
