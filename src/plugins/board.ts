@@ -279,14 +279,23 @@ function findAvailablePort(startPort: number, maxRetries: number): Promise<numbe
 
 export function renderUI(specs: BoardSpec[]): void {
   const html = generateHTML(specs);
-  let requestCount = 0;
+  let inactivityTimer: NodeJS.Timeout | null = null;
   let server: Server;
+
+  function resetInactivityTimer(srv: Server) {
+    if (inactivityTimer) clearInterval(inactivityTimer);
+    inactivityTimer = setInterval(() => {
+      clearInterval(inactivityTimer!);
+      srv.close();
+      process.exit(0);
+    }, 300_000);
+  }
 
   findAvailablePort(3456, 5).then(port => {
     server = createServer((req, res) => {
-      requestCount++;
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(html);
+      resetInactivityTimer(server);
     });
 
     server.listen(port, "127.0.0.1", () => {
@@ -297,14 +306,12 @@ export function renderUI(specs: BoardSpec[]): void {
       const openCmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
       exec(`${openCmd} "${url}"`);
 
-      const inactivityTimer = setInterval(() => {
-        if (requestCount === 0) {
-          clearInterval(inactivityTimer);
-          server.close();
-          process.exit(0);
-        }
-        requestCount = 0;
-      }, 300_000);
+      resetInactivityTimer(server);
+    });
+
+    process.on("SIGINT", () => {
+      server.close();
+      process.exit(0);
     });
   }).catch(err => {
     console.error(chalk.red(`Failed to start board UI: ${err.message}`));
