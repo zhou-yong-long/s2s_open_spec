@@ -4,6 +4,8 @@
 **Author:** wade
 **Created:** 2026-05-01
 
+> **Implementation note (this repository):** The `sdd plan` command and some plugin hooks described below are design targets; the published `sdd-cli` may not include them yet. Treat `in-progress` as a normal frontmatter value you set by hand or with external tooling until a `plan` command exists.
+
 ## Problem
 
 Spec-Driven Development lacks a lightweight, language-agnostic framework that works for both solo

@@ -30,7 +30,7 @@ export const defaultConfig: Config = {
   template: "default",
   doctor: { flat_max: 12, similarity_threshold: 0.6 },
   paths: { specs: "specs/", active: "specs/active/", completed: "specs/completed/", archived: "specs/archived/" },
-  plugins: { doctor: false, diff: false, workflow: false, board: false, git_hooks: false, ai: false },
+  plugins: { doctor: true, diff: true, workflow: true, board: true, git_hooks: false, ai: false },
   extractors: { ".ts": "typescript", ".py": "python", ".go": null },
 };
 

@@ -10,12 +10,10 @@ paths:
   completed: specs/completed/
   archived: specs/archived/
 plugins:
-  doctor: false
-  diff: false
-  workflow: false
-  board: false
-  git_hooks: false
-  ai: false
+  doctor: true
+  diff: true
+  workflow: true
+  board: true
 extractors:
   ".ts": typescript
   ".py": python

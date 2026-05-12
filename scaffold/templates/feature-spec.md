@@ -9,6 +9,11 @@ links:
   related: []
 pinned_commit: null
 linked_files: []
+# Optional Open Spec / sync metadata (ignored by core SDD fields; keep for Feishu→repo tools & progressive disclosure):
+# summary: "One-line or short paragraph for agents to read first."
+# detail_tier: minimal   # minimal | default | full — hint for how much body to load
+# source: { system: feishu, doc_token: "..." }
+# exposed_sections: ["Problem", "Acceptance criteria"]
 ---
 
 # {{TITLE}}

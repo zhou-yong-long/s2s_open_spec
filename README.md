@@ -19,8 +19,14 @@ npm install -g sdd-cli
 # Initialize SDD in your project
 sdd init
 
-# Create your first spec
+# Create your first spec (engineering template)
 sdd new my-feature
+
+# PM-heavy spec (file: specs/active/YYYY-MM-DD-pm-<slug>.md)
+sdd new "Billing rollout" --type feature-spec-pm
+
+# QA checklist from spec (file: ...-qa-<slug>.md)
+sdd new login-flow --type qa-from-spec
 
 # Write the spec (opens $EDITOR), then review it
 sdd review specs/active/2026-01-01-my-feature.md --self
@@ -42,7 +48,7 @@ sdd complete specs/active/2026-01-01-my-feature.md
 | Command | Description |
 |---------|-------------|
 | `sdd init` | Scaffold SDD directory structure in current project |
-| `sdd new <name>` | Create a new spec from template |
+| `sdd new <name>` | Create from template (`--type`: `feature-spec` (default), `feature-spec-pm`, `qa-from-spec`, `design-doc`, `adr`) |
 | `sdd status` | List all specs with status and staleness indicators |
 | `sdd amend <spec>` | Record a minor change to an existing spec |
 
@@ -55,6 +61,13 @@ sdd complete specs/active/2026-01-01-my-feature.md
 | `sdd archive <spec>` | workflow | Archive a spec (not completed) |
 | `sdd doctor` | doctor | Health checks: stale specs, duplicates, mode suggestions |
 | `sdd diff <spec>` | diff | Detect drift between spec interfaces and code |
+
+When **`workflow: true`**, these commands are also available:
+
+| Command | Description |
+|---------|-------------|
+| `sdd threads <spec>` | List review threads on a spec |
+| `sdd resolve <spec> <index> -m "msg"` | Resolve a thread by index |
 
 ## Spec Lifecycle
 
@@ -90,7 +103,7 @@ version: "1"
 mode: flat              # flat | domain | team
 template: default       # minimal | default | full
 plugins:
-  workflow: false       # sdd review, sdd complete, sdd archive
+  workflow: false       # sdd review, complete, archive, threads, resolve
   diff: false           # sdd diff (spec-vs-code drift detection)
   doctor: false         # sdd doctor (project health checks)
 extractors:
@@ -112,11 +125,29 @@ Three templates included:
 
 Also includes templates for **Design Docs** and **ADR** (Architecture Decision Records).
 
+Additional templates in `scaffold/templates/` (also selectable via `sdd new --type`):
+
+| File | `sdd new --type` | Output filename pattern |
+|------|------------------|-------------------------|
+| `feature-spec-pm.md` | `feature-spec-pm` | `YYYY-MM-DD-pm-<slug>.md` |
+| `qa-from-spec.md` | `qa-from-spec` | `YYYY-MM-DD-qa-<slug>.md` |
+
+Use quotes around `<name>` when the title contains spaces (shell passes a single argument). Slug always lowercases alphanumeric segments separated by `-`.
+
 ## AI Integration
 
 `sdd init` generates a `CLAUDE.md` that teaches AI agents the SDD workflow — checking specs before coding, respecting the status lifecycle, and knowing when to amend vs. create new specs.
 
 Compatible with Claude Code, Codex, and other AI coding assistants.
+
+See **[docs/karmastudio-sdd-delivery.md](docs/karmastudio-sdd-delivery.md)** for packaging SDD into an internal IDE (for example KarmaStudio), Feishu → Open Spec alignment, and the suggested file bundle for integration partners.
+
+**One-folder handoff (install + usage + AI prompts + examples):** **[`delivery/`](delivery/README.md)** — synced from `docs/` via `npm run delivery:sync`. Same prompts also live under [docs/ai-delivery](docs/ai-delivery/README.md). Install from branch **`feature/sdd-karmastudio-pack`**, not **`main`**.
+
+### CLI vs design docs
+
+- The long-form design under `docs/superpowers/` may mention **`sdd plan`**; that command is **not implemented** in this repo yet. Use `status: in-progress` in frontmatter manually when implementation starts.
+- Optional YAML keys for tooling (for example `summary`, `detail_tier`, `source` from a Feishu sync) are **merged through** `parseSpec` / `updateFrontmatter`: they live in `frontmatterExtra` and are written back with the core fields so `sdd review` and similar commands do not drop them.
 
 ## Development
 
@@ -132,6 +163,23 @@ npm run dev -- new my-feature
 # Run tests
 npm test
 ```
+
+### Offline install bundle (no `git push` needed)
+
+From a clean checkout of branch `feature/sdd-karmastudio-pack`:
+
+```bash
+npm run bundle
+```
+
+This runs `build`, `test`, `delivery:sync`, `npm pack`, `git archive` (full source with tests), and writes **`release/sdd-cli-offline-<timestamp>.zip`**. The zip contains:
+
+- `sdd-cli-0.1.0.tgz` — global install (`npm install -g ./sdd-cli-0.1.0.tgz`)
+- `INSTALL.md` — short tarball-focused steps
+- **`delivery/`** — full handoff copy (see `delivery/README.md` inside)
+- `*-full-source.zip` — optional full tree with tests
+
+Share the zip over Lark / USB / internal drive.
 
 ## License
 
