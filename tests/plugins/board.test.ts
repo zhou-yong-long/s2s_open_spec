@@ -122,6 +122,7 @@ describe("renderTerminal", () => {
       { fileName: "a.md", title: "This Is A Very Long Spec Title That Should Be Truncated", status: "draft", author: "x", domain: null, created: "", tags: [] },
     ];
     const output = renderTerminal(specs, { colWidth: 16 });
-    expect(output.length).toBeGreaterThan(0);
+    expect(output).toContain("…");
+    expect(output).not.toContain("This Is A Very Long Spec Title That Should Be Truncated");
   });
 });
