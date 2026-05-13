@@ -107,7 +107,7 @@ export function buildIndex(
     const sourceFiles: string[] = [];
     const srcPath = join(srcDir, name);
     if (existsSync(srcPath)) {
-      sourceFiles.push(...collectTsFiles(srcPath, opts.srcDir ?? "src"));
+      sourceFiles.push(...collectTsFiles(srcPath, opts.srcDir ?? "src", projectRoot));
     }
 
     domains.push({
@@ -149,18 +149,18 @@ export function readIndex(indexPath: string): HiveIndex | null {
 
 // --- Internal helpers ---
 
-function collectTsFiles(dir: string, basePath: string): string[] {
+function collectTsFiles(dir: string, basePath: string, projectRoot: string): string[] {
   const files: string[] = [];
   const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      files.push(...collectTsFiles(fullPath, basePath));
+      files.push(...collectTsFiles(fullPath, basePath, projectRoot));
     } else if (entry.name.endsWith(".ts")) {
       files.push(
         join(
           basePath,
-          relativePath(join(process.cwd(), ".."), dir),
+          relative(projectRoot, dir),
           entry.name
         )
       );
@@ -169,15 +169,3 @@ function collectTsFiles(dir: string, basePath: string): string[] {
   return files;
 }
 
-function relativePath(from: string, to: string): string {
-  const fromParts = from.split("/").filter(Boolean);
-  const toParts = to.split("/").filter(Boolean);
-  let i = 0;
-  while (
-    i < fromParts.length &&
-    i < toParts.length &&
-    fromParts[i] === toParts[i]
-  )
-    i++;
-  return toParts.slice(i).join("/");
-}
