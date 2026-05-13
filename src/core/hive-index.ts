@@ -157,13 +157,7 @@ function collectTsFiles(dir: string, basePath: string, projectRoot: string): str
     if (entry.isDirectory()) {
       files.push(...collectTsFiles(fullPath, basePath, projectRoot));
     } else if (entry.name.endsWith(".ts")) {
-      files.push(
-        join(
-          basePath,
-          relative(projectRoot, dir),
-          entry.name
-        )
-      );
+      files.push(relative(projectRoot, fullPath));
     }
   }
   return files;
