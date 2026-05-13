@@ -37,7 +37,9 @@ function parseSpecFrontmatter(filePath: string): { title: string; status: SpecSt
     const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
     if (!match) return null;
     const raw = (yaml.load(match[1]) as Record<string, unknown>) ?? {};
-    const title = (match[2].split("\n")[0] || "").replace(/^# /, "").trim() || "Untitled";
+    const bodyLines = match[2].split("\n");
+    const firstNonEmpty = bodyLines.find(l => l.trim() !== "") || "";
+    const title = firstNonEmpty.replace(/^# /, "").trim() || "Untitled";
     return {
       title,
       status: coerceStatus(raw.status),
