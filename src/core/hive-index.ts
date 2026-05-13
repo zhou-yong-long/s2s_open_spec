@@ -107,7 +107,7 @@ export function buildIndex(
     const sourceFiles: string[] = [];
     const srcPath = join(srcDir, name);
     if (existsSync(srcPath)) {
-      sourceFiles.push(...collectTsFiles(srcPath, opts.srcDir ?? "src", projectRoot));
+      sourceFiles.push(...collectTsFiles(srcPath, projectRoot));
     }
 
     domains.push({
@@ -149,13 +149,13 @@ export function readIndex(indexPath: string): HiveIndex | null {
 
 // --- Internal helpers ---
 
-function collectTsFiles(dir: string, basePath: string, projectRoot: string): string[] {
+function collectTsFiles(dir: string, projectRoot: string): string[] {
   const files: string[] = [];
   const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      files.push(...collectTsFiles(fullPath, basePath, projectRoot));
+      files.push(...collectTsFiles(fullPath, projectRoot));
     } else if (entry.name.endsWith(".ts")) {
       files.push(relative(projectRoot, fullPath));
     }
