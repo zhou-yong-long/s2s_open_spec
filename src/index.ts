@@ -5,6 +5,7 @@ import { initCommand } from "./commands/init.js";
 import { newCommand } from "./commands/new.js";
 import { statusCommand } from "./commands/status.js";
 import { amendCommand } from "./commands/amend.js";
+import { syncSpecsCommand } from "./commands/sync-specs.js";
 import { loadPlugins } from "./plugins/loader.js";
 import { readConfig } from "./core/config.js";
 
@@ -20,6 +21,7 @@ async function main() {
     .command(newCommand)
     .command(statusCommand)
     .command(amendCommand)
+    .command(syncSpecsCommand)
     .demandCommand(1, "Use one of the commands above")
     .help()
     .version("0.1.0");
