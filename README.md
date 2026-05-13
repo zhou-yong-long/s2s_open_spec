@@ -58,6 +58,7 @@ sdd complete specs/active/2026-01-01-my-feature.md
 | `sdd new <name>` | Create from template (`--type`: `feature-spec` (default), `feature-spec-pm`, `qa-from-spec`, `design-doc`, `adr`) |
 | `sdd status` | List all specs with status and staleness indicators |
 | `sdd amend <spec>` | Record a minor change to an existing spec |
+| `sdd sync-specs` | Scan project and generate Hive Mind spec index (`.hivemind/specs.json`) |
 
 ### Plugins (opt-in via `.sdd/config.yaml`)
 
@@ -165,6 +166,37 @@ Compatible with Claude Code, Codex, and other AI coding assistants.
 See **[docs/karmastudio-sdd-delivery.md](docs/karmastudio-sdd-delivery.md)** for packaging SDD into an internal IDE (for example KarmaStudio), Feishu → Open Spec alignment, and the suggested file bundle for integration partners.
 
 **One-folder handoff (install + usage + AI prompts + examples):** **[`delivery/`](delivery/README.md)** — synced from `docs/` via `npm run delivery:sync`. Same prompts also live under [docs/ai-delivery](docs/ai-delivery/README.md).
+
+### Hive Mind Spec Index
+
+`sdd sync-specs` generates a lightweight domain index at `.hivemind/specs.json` that helps AI agents discover project structure and retrieve spec content from Hive Mind on demand.
+
+```bash
+# Generate index (scans src/ and specs/active/)
+sdd sync-specs
+
+# Force rescan (ignores 5-minute debounce)
+sdd sync-specs --force
+```
+
+The index contains domain names, source file mappings, and Hive Mind resource URIs. AI agents use this as a "table of contents" — they read the index to know what domains exist, then retrieve actual spec content from Hive Mind cloud when needed.
+
+**Index format:**
+```json
+{
+  "version": "1",
+  "project": "my-project",
+  "last_synced": "2026-05-13T00:00:00Z",
+  "domains": [
+    {
+      "name": "auth",
+      "description": "Domain: auth",
+      "source_files": ["src/core/auth.ts"],
+      "hive_uri": null
+    }
+  ]
+}
+```
 
 ### CLI vs design docs
 
