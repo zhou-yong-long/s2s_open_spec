@@ -19,21 +19,26 @@ export const syncSpecsCommand: CommandModule<{}, SyncSpecsArgs> = {
     const cwd = process.cwd();
     const indexPath = join(cwd, ".hivemind", "specs.json");
 
-    if (!argv.force) {
-      const existing = readIndex(indexPath);
-      if (existing && shouldDebounce(existing.last_synced)) {
-        const mins = Math.floor((Date.now() - new Date(existing.last_synced).getTime()) / 60000);
-        console.log(chalk.yellow(`Index up-to-date (synced ${mins} min ago). Use --force to rescan.`));
-        return;
+    try {
+      if (!argv.force) {
+        const existing = readIndex(indexPath);
+        if (existing && shouldDebounce(existing.last_synced)) {
+          const mins = Math.floor((Date.now() - new Date(existing.last_synced).getTime()) / 60000);
+          console.log(chalk.yellow(`Index up-to-date (synced ${mins} min ago). Use --force to rescan.`));
+          return;
+        }
       }
-    }
 
-    const index = buildIndex(cwd);
-    writeIndex(indexPath, index);
+      const index = buildIndex(cwd);
+      writeIndex(indexPath, index);
 
-    console.log(chalk.green(`Found ${index.domains.length} domains, index written to .hivemind/specs.json`));
-    for (const d of index.domains) {
-      console.log(chalk.dim(`  - ${d.name} (${d.source_files.length} files)`));
+      console.log(chalk.green(`Found ${index.domains.length} domains, index written to .hivemind/specs.json`));
+      for (const d of index.domains) {
+        console.log(chalk.dim(`  - ${d.name} (${d.source_files.length} files)`));
+      }
+    } catch (err) {
+      console.error(chalk.red(`Error: ${err.message}`));
+      process.exit(1);
     }
   },
 };

@@ -30,7 +30,6 @@ describe("sdd sync-specs", () => {
     writeFileSync(join(testDir, "src/core/spec.ts"), "export {}");
 
     const output = run("sync-specs", testDir);
-    expect(output).toContain("domains");
 
     const indexPath = join(testDir, ".hivemind/specs.json");
     expect(existsSync(indexPath)).toBe(true);
@@ -38,6 +37,7 @@ describe("sdd sync-specs", () => {
     const index = JSON.parse(readFileSync(indexPath, "utf-8"));
     expect(index.version).toBe("1");
     expect(index.domains.length).toBeGreaterThan(0);
+    expect(output).toContain(`${index.domains.length} domains`);
   });
 
   it("skips scan when within debounce window", () => {
