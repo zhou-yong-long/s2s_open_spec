@@ -37,7 +37,7 @@ export const syncSpecsCommand: CommandModule<{}, SyncSpecsArgs> = {
         console.log(chalk.dim(`  - ${d.name} (${d.source_files.length} files)`));
       }
     } catch (err) {
-      console.error(chalk.red(`Error: ${err.message}`));
+      console.error(chalk.red(`Error: ${err instanceof Error ? err.message : String(err)}`));
       process.exit(1);
     }
   },
