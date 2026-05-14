@@ -1,13 +1,25 @@
 #!/usr/bin/env node
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { initCommand } from "./commands/init.js";
 import { newCommand } from "./commands/new.js";
 import { statusCommand } from "./commands/status.js";
 import { amendCommand } from "./commands/amend.js";
 import { syncSpecsCommand } from "./commands/sync-specs.js";
+import { linkCommand } from "./commands/link.js";
+import { unlinkCommand } from "./commands/unlink.js";
+import { linksCommand } from "./commands/links.js";
+import { graphCommand } from "./commands/graph.js";
+import { syncLinksCommand } from "./commands/sync-links.js";
 import { loadPlugins } from "./plugins/loader.js";
 import { readConfig } from "./core/config.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
+const CLI_VERSION = pkg.version as string;
 
 async function main() {
   const cwd = process.cwd();
@@ -22,9 +34,14 @@ async function main() {
     .command(statusCommand)
     .command(amendCommand)
     .command(syncSpecsCommand)
+    .command(linkCommand)
+    .command(unlinkCommand)
+    .command(linksCommand)
+    .command(graphCommand)
+    .command(syncLinksCommand)
     .demandCommand(1, "Use one of the commands above")
     .help()
-    .version("0.1.0");
+    .version(CLI_VERSION);
 
   if (config) {
     const pluginCommands = await loadPlugins(config, cwd);

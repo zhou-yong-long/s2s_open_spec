@@ -1,5 +1,6 @@
 ---
 status: draft
+type: {{TYPE}}
 author: {{AUTHOR}}
 created: {{DATE}}
 domain: {{DOMAIN}}

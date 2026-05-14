@@ -104,6 +104,7 @@ export const newCommand: CommandModule<{}, NewArgs> = {
       DATE: date,
       TITLE: argv.name!,
       DOMAIN: argv.domain ?? "null",
+      TYPE: argv.type!,
       NUMBER: String(Math.floor(Math.random() * 1000)).padStart(3, "0"),
     });
 

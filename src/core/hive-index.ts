@@ -8,7 +8,7 @@ import {
 import { join, basename, relative } from "path";
 import yaml from "js-yaml";
 
-const YAML_RE = /^---\n([\s\S]*?)\n---/;
+const YAML_RE = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 const DEBOUNCE_MS = 5 * 60 * 1000;
 
 export interface HiveDomain {
@@ -18,11 +18,23 @@ export interface HiveDomain {
   hive_uri: string | null;
 }
 
+export interface HiveSpecMeta {
+  file_name: string;
+  title: string;
+  type: string | null;
+  status: string;
+  domain: string | null;
+  tags: string[];
+  created: string;
+  author: string;
+}
+
 export interface HiveIndex {
   version: string;
   project: string;
   last_synced: string;
   domains: HiveDomain[];
+  specs: HiveSpecMeta[];
 }
 
 export interface ScanOptions {
@@ -78,6 +90,48 @@ export function scanSpecDomains(specsDir: string): string[] {
 }
 
 /**
+ * Scan spec files and collect their metadata for the index.
+ * Returns an array of spec metadata objects.
+ */
+export function scanSpecMetadata(specsDir: string): HiveSpecMeta[] {
+  if (!existsSync(specsDir)) return [];
+  const specs: HiveSpecMeta[] = [];
+
+  const entries = readdirSync(specsDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      specs.push(...scanSpecMetadata(join(specsDir, entry.name)));
+    } else if (entry.name.endsWith(".md")) {
+      try {
+        const content = readFileSync(join(specsDir, entry.name), "utf-8");
+        const match = content.match(YAML_RE);
+        if (match) {
+          const parsed = yaml.load(match[1]) as Record<string, unknown>;
+          const bodyLines = match[2]?.split("\n") || [];
+          const firstNonEmpty = bodyLines.find((l: string) => l.trim() !== "") || "";
+          const title = firstNonEmpty.replace(/^# /, "").trim() || entry.name.replace(/\.md$/, "");
+
+          specs.push({
+            file_name: entry.name,
+            title,
+            type: parsed?.type ? String(parsed.type) : null,
+            status: parsed?.status ? String(parsed.status) : "draft",
+            domain: parsed?.domain ? String(parsed.domain) : null,
+            tags: Array.isArray(parsed?.tags) ? (parsed.tags as unknown[]).map(String) : [],
+            created: parsed?.created ? String(parsed.created) : "",
+            author: parsed?.author ? String(parsed.author) : "",
+          });
+        }
+      } catch {
+        // Skip unparseable files
+      }
+    }
+  }
+
+  return specs;
+}
+
+/**
  * Check if the index was synced within the debounce window (5 minutes).
  */
 export function shouldDebounce(lastSynced: string): boolean {
@@ -89,6 +143,7 @@ export function shouldDebounce(lastSynced: string): boolean {
 /**
  * Build a Hive Index by scanning src/ directories and spec frontmatter.
  * Domains from both sources are merged; src directories get file mappings.
+ * Spec metadata is collected for tag/type filtering.
  */
 export function buildIndex(
   projectRoot: string,
@@ -99,6 +154,7 @@ export function buildIndex(
 
   const srcDomains = scanSrcDomains(srcDir);
   const specDomains = scanSpecDomains(specsDir);
+  const specMetadata = scanSpecMetadata(specsDir);
 
   const allDomains = new Set<string>([...srcDomains, ...specDomains]);
 
@@ -123,6 +179,7 @@ export function buildIndex(
     project: basename(projectRoot),
     last_synced: new Date().toISOString(),
     domains,
+    specs: specMetadata,
   };
 }
 

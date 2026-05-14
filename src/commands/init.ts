@@ -1,6 +1,7 @@
 import type { CommandModule } from "yargs";
-import { existsSync, readdirSync } from "fs";
+import { existsSync, readdirSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import yaml from "js-yaml";
 import { copyScaffold } from "../core/scaffold.js";
 import { writeConfig, readConfig, type Mode, type Template } from "../core/config.js";
 import { gitInit, getCurrentUser } from "../core/git.js";
@@ -11,6 +12,19 @@ interface InitArgs {
   template?: Template;
   force?: boolean;
 }
+
+const DEFAULT_LINKS_DATA = {
+  version: 1,
+  linkTypes: [
+    { name: "parent", directed: true, description: "Parent-child hierarchy" },
+    { name: "child", directed: true, description: "Auto-generated reverse of parent" },
+    { name: "blocks", directed: true, description: "Source must be completed before target" },
+    { name: "blocked-by", directed: true, description: "Auto-generated reverse of blocks" },
+    { name: "relates", directed: false, description: "Loose association between specs" },
+    { name: "duplicates", directed: false, description: "Target supersedes source" },
+  ],
+  links: [],
+};
 
 export const initCommand: CommandModule<{}, InitArgs> = {
   command: "init",
@@ -34,6 +48,15 @@ export const initCommand: CommandModule<{}, InitArgs> = {
     if (argv.mode) config.mode = argv.mode;
     if (argv.template) config.template = argv.template;
     writeConfig(cwd, config);
+
+    // Create initial links.yaml
+    const sddDir = join(cwd, ".sdd");
+    mkdirSync(sddDir, { recursive: true });
+    const linksPath = join(sddDir, "links.yaml");
+    if (!existsSync(linksPath)) {
+      writeFileSync(linksPath, yaml.dump(DEFAULT_LINKS_DATA, { indent: 2, lineWidth: 120 }));
+    }
+
     if (!existsSync(join(cwd, ".git"))) gitInit(cwd);
     console.log(chalk.green(`SDD project initialized. Mode: ${config.mode}, Template: ${config.template}`));
   },

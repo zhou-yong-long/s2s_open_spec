@@ -6,6 +6,7 @@ export type SpecStatus = (typeof SPEC_STATUSES)[number];
 
 export interface SpecFrontmatter {
   status: SpecStatus;
+  type: string | null;
   author: string;
   created: string;
   domain: string | null;
@@ -54,6 +55,7 @@ const YAML_RE = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 
 const CORE_FRONTMATTER_KEYS = new Set<string>([
   "status",
+  "type",
   "author",
   "created",
   "domain",
@@ -74,6 +76,7 @@ function normalizeFrontmatter(parsed: Record<string, unknown>): SpecFrontmatter 
   const p = parsed as Partial<SpecFrontmatter>;
   return {
     status: coerceStatus(p.status),
+    type: p.type === null || p.type === undefined ? null : String(p.type),
     author: typeof p.author === "string" ? p.author : "",
     created: typeof p.created === "string" ? p.created : "",
     domain: p.domain === null || p.domain === undefined ? null : String(p.domain),
@@ -116,7 +119,7 @@ export function parseSpec(filePath: string): Spec {
     frontmatterExtra = extraFromRaw(raw);
     body = match[2];
   } else {
-    frontmatter = { status: "draft", author: "", created: "", domain: null, tags: [], links: { parent: null, related: [] }, pinned_commit: null, linked_files: [] };
+    frontmatter = { status: "draft", type: null, author: "", created: "", domain: null, tags: [], links: { parent: null, related: [] }, pinned_commit: null, linked_files: [] };
     frontmatterExtra = {};
     body = content;
   }
